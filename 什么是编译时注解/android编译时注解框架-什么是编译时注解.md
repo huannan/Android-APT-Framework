@@ -1,33 +1,10 @@
-##Android编译时注解框架-什么是编译时注解
-
-<br/>
-
-《Android编译时注解框架-什么是编译时注解》
-
-[《Android编译时注解框架-Run Demo》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/run-demo/android编译时注解框架-run_demo.md)
-
-[《Android编译时注解框架-Run Project：OnceClick》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/run-project/android编译时注解框架-run_project.md)
-
-[《Android编译时注解框架-爬坑》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/爬坑/android编译时注解框架-爬坑.md)
-
-[《Android编译时注解框架-语法讲解》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/语法讲解/android编译时注解框架-语法讲解.md)
-
-[《Android编译时注解框架-数据库ORM框架CakeDao》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/CakeDao/android编译时注解框架-数据库orm框架cakedao.md)
-
-[《Android编译时注解框架-APP更新回滚框架CakeRun》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/CakeRun/android编译时注解框架-hold_bug框架cakerun.md)
-
-==============
+## Android编译时注解框架-什么是编译时注解
 
 ### 概述
 
 **Android编译时注解框架从入门到项目实践**。该系列将通过5篇博客一步步教你打造一个属于自己的编译时注解框架，并在之后开源出基于APT的编译时注解框架。
 
 提到注解，普遍都会有两种态度：黑科技、低性能。使用注解往往可以实现用非常少的代码作出匪夷所思的事情，比如这些框架：ButterKnife、Retrofit。但一直被人诟病的是，运行时注解会因为java反射而引起较为严重的性能问题...
-
-
-
-<!-- more -->
-
 
 今天我们要讲的是，不会对性能有任何影响的黑科技：**编译时注解**。也有人叫它**代码生成**，其实他们还是有些区别的，在编译时对注解做处理，通过注解，获取必要信息，在项目中生成代码，运行时调用，和直接运行手写代码没有任何区别。而更准确的叫法：APT - Annotation Processing Tool
 
@@ -43,11 +20,12 @@
 
 
 
+
 ### 什么是注解
 
 注解你一定不会陌生，这就是我们最常见的注解：
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/1.jpeg)
+![](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/51556ba2261948e5b27364c651cb3b63~tplv-k3u1fbpfcp-watermark.image)
 
 
 首先注解分为三类：
@@ -92,11 +70,13 @@
 
 之前我们是这样设置布局文件的：
 
-	@Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
-    }
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_home);
+}
+```
     
 如果使用注解，我们就可以这样设置布局了
 
