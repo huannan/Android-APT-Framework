@@ -1,22 +1,4 @@
-##Android编译时注解框架-爬坑
-
-<br/>
-
-[《Android编译时注解框架-什么是编译时注解》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/什么是编译时注解/android编译时注解框架-什么是编译时注解.md)
-
-[《Android编译时注解框架-Run Demo》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/run-demo/android编译时注解框架-run_demo.md)
-
-[《Android编译时注解框架-Run Project：OnceClick》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/run-project/android编译时注解框架-run_project.md)
-
-《Android编译时注解框架-爬坑》
-
-[《Android编译时注解框架-语法讲解》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/语法讲解/android编译时注解框架-语法讲解.md)
-
-[《Android编译时注解框架-数据库ORM框架CakeDao》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/CakeDao/android编译时注解框架-数据库orm框架cakedao.md)
-
-[《Android编译时注解框架-APP更新回滚框架CakeRun》](https://github.com/lizhaoxuan/Android-APT-Framework/blob/master/CakeRun/android编译时注解框架-hold_bug框架cakerun.md)
-
-==============
+## Android编译时注解框架-爬坑
 
 ### 概述
 
@@ -26,19 +8,16 @@
 
 随时踩坑，随时更新~
 
-<!-- more -->
-
 
 ### 坑1：无法引入javax包下的类库
 
 编写编译时注解框架时，需要用到javax包下的一些类库，但是引入包时却提示没有。
 
-![](http://img1.ph.126.net/31LiF8uDczvrBRXGdUS3sA==/6631518565466913139.jpeg)
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/84bd9900457648bbaaf568cb0b2d6b1e~tplv-k3u1fbpfcp-watermark.image)
 
 
 #####解决：javax包属于java,Android核心库中没有。所以不能直接在app Module和Android Library中使用，必须要创建一个Java Library。然后由Java Library导出jar包使用。
 
-----------------
 
 ### 坑2：Build通过，编译失败
 
@@ -48,16 +27,15 @@
 	> com.android.build.api.transform.TransformException: com.android.ide.common.process.ProcessException: java.util.concurrent.ExecutionException: com.android.ide.common.process.ProcessException: org.gradle.process.internal.ExecException: Process 'command '/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/bin/java'' finished with non-zero exit value 2
 
 
-![](http://img0.ph.126.net/wKyp9tTXrwzlx7JyoMhu-g==/6631819831652925888.jpg)
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/57134e9600ca4634843068460ea30ad1~tplv-k3u1fbpfcp-watermark.image)
 
 	
 这个问题引起了很大程度的误解，因为是看错误信息是jdk的错误，关注点一直放到了jdk版本上。
 
 开始换了jdk版本为1.8。成功运行了一次，但是之后修改代码又报错了。
 
-#####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。
+#####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。（修复者注：现在可以使用annotationProcessor或者kapt）
 
-----------------
 
 ### 坑3：只能成功运行一次，修改代码后再运行就报错
 
@@ -65,9 +43,8 @@
 
 app Moudle直接引用 apt Module 可以成功运行一次，但再次修改apt Module代码后，运行就会报错，代码再修改回来，就又可以运行了。（就好像一次性项目一样……）
 
-#####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。
+#####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。（修复者注：现在可以使用annotationProcessor或者kapt）
 
-----------------
 
 ### 坑4：错误: javax.annotation.processing.Processor: Error reading configuration file时抛出异常错误
 
@@ -76,15 +53,14 @@ app Moudle直接引用 apt Module 可以成功运行一次，但再次修改apt 
 
 	错误: 服务配置文件不正确, 或构造处理程序对象javax.annotation.processing.Processor: Error reading configuration file时抛出异常错误
 
-#####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。
+#####解决： app Moudle不能直接引用 apt Module（编写注解处理代码的Module），需要apt Module导出jar包，app Moudle引入jar包才可以。（修复者注：现在可以使用annotationProcessor或者kapt；现在可以直接加上@AutoService注解代替这个麻烦的配置）
 
-----------------
 
 ### 坑5：成功运行，没有任何报错，但也没有任何预期结果。
 
 这是比较容易忽视的两个问题。
 
-#####Check 1:检查是否添加了配置文件：*javax.annotation.processing.Processor*
+#####Check 1:检查是否添加了配置文件：*javax.annotation.processing.Processor*（修复者注：现在可以直接加上@AutoService注解代替这个麻烦的配置）
 
 （添加方式请看 前一篇 《Android编译时注解框架-Run Demo》）
 
@@ -92,13 +68,11 @@ app Moudle直接引用 apt Module 可以成功运行一次，但再次修改apt 
 
 重写该方法告诉*Processor*它需要处理哪些注解。
 	
-----------------
 	
 ### 坑6：替换APT jar包后，apt代码并没有被执行。
 
-#####解决： 尝试 clean项目 ，并重新编译。
+#####解决： 尝试 clean项目 ，并重新编译。（修复者注：clean项目会删除生成的代码，重新编译的时候会重新生成，有时候项目报红的时候很有用）
 	
-----------------
 
 	
 	
