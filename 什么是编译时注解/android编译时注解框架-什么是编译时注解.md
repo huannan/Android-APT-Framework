@@ -80,10 +80,12 @@ protected void onCreate(Bundle savedInstanceState) {
     
 如果使用注解，我们就可以这样设置布局了
 
-	@ContentView(R.layout.activity_home)
-	public class HomeActivity extends BaseActivity {
-		。。。
-	}
+```java
+@ContentView(R.layout.activity_home)
+public class HomeActivity extends BaseActivity {
+    。。。
+}
+```
 	
 我们先不讲这两种方式哪个好哪个坏，我们只谈技术不谈需求。
 
@@ -91,16 +93,18 @@ protected void onCreate(Bundle savedInstanceState) {
 
 #### 创建一个注解
 	
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ElementType.TYPE})
-	public @interface ContentView {
-    	int value();
-	}
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface ContentView {
+    int value();
+}
+```
 
 
 **第一行:@Retention(RetentionPolicy.RUNTIME)**
 
-@Retention用来修饰这是一个什么类型的注解。这里表示该注解是一个运行时注解。这样APT就知道啥时候处理这个注解了。
+@Retention用来修饰这是一个什么类型的注解（即注解保留到什么阶段）。这里表示该注解是一个运行时注解。这样APT就知道啥时候处理这个注解了。
 
 **第二行：@Target({ElementType.TYPE})**
 
@@ -110,18 +114,24 @@ protected void onCreate(Bundle savedInstanceState) {
 
 这里的interface并不是说ContentView是一个接口。就像申明类用关键字class。申明枚举用enum。申明注解用的就是@interface。（值得注意的是：在ElementType的分类中，class、interface、Annotation、enum同属一类为Type，并且从官方注解来看，似乎interface是包含@interface的）
 
-	/** Class, interface (including annotation type), or enum declaration */
-	TYPE,
+```java
+/** Class, interface (including annotation type), or enum declaration */
+    TYPE,
+```
 
 **第四行：int value();**
 
 返回值表示这个注解里可以存放什么类型值。比如我们是这样使用的
 
-	@ContentView(R.layout.activity_home)
+```java
+@ContentView(R.layout.activity_home)
+```
 	
 R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 
-	@ContentView(“string”)
+```java
+@ContentView(“string”)
+```
 	
 
 **关于注解的具体语法，这篇不在详述，统一放到《Android编译时注解框架-语法讲解》中**
@@ -131,31 +141,35 @@ R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 
 注解申明好了，但具体是怎么识别这个注解并使用的呢？
 
-	@ContentView(R.layout.activity_home)
-	public class HomeActivity extends BaseActivity {
-		。。。
-	}
+```java
+@ContentView(R.layout.activity_home)
+public class HomeActivity extends BaseActivity {
+    。。。
+}
+```
 
 注解的解析就在BaseActivity中。我们看一下BaseActivity代码
 
-	public class BaseActivity extends AppCompatActivity {
-	
-		@Override
-    	protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //注解解析
-		for (Class c = this.getClass(); c != Context.class; c = c.getSuperclass()) {
-            ContentView annotation = (ContentView) c.getAnnotation(ContentView.class);
-            if (annotation != null) {
-                try {
-                    this.setContentView(annotation.value());
-                } catch (RuntimeException e) {
-                    e.printStackTrace();
-                }
-                return;
+```java
+public class BaseActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    //注解解析
+    for (Class c = this.getClass(); c != Context.class; c = c.getSuperclass()) {
+        ContentView annotation = (ContentView) c.getAnnotation(ContentView.class);
+        if (annotation != null) {
+            try {
+                this.setContentView(annotation.value());
+            } catch (RuntimeException e) {
+                e.printStackTrace();
             }
+            return;
         }
-	}
+    }
+}
+```
 
 
 	
@@ -184,19 +198,19 @@ R.layout.activity_home实质是一个int型id，如果这样用就会报错：
 
 ### 编译时注解框架ButterKnife源码初探
 
-ButterKnife大家应该都很熟悉的吧，9000多颗start，让我们彻底告别了枯燥的findViewbyId。它的使用方式是这样的：
+ButterKnife大家应该都很熟悉的吧，9000多颗start，让我们彻底告别了枯燥的findViewById。它的使用方式是这样的：
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/2.jpeg)
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d81bb42370944e3f9c0bc029f88c06ca~tplv-k3u1fbpfcp-watermark.image)
 
 你难道就没有好奇过，它是怎么实现的吗？嘿嘿，这就是编译时注解-代码生成的黑科技所在了。
 
 秘密在这里，编译工程后，打开你的项目app目录下的build目录：
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/3.jpeg)
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/607363c636544dfda20f14755d35f392~tplv-k3u1fbpfcp-watermark.image)
 
 你可以看到一些带有*$$ViewBinder*后缀的类文件。这个就是ButterKnife生成的代码我们打开它：
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/5.jpeg)
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f6052bba80c24372ba4a1621d248af5d~tplv-k3u1fbpfcp-watermark.image)
 
 
 
@@ -206,43 +220,49 @@ ButterKnife大家应该都很熟悉的吧，9000多颗start，让我们彻底告
 
 1.ForgetActivity$$ViewBinder 和 我们的 ForgetActivity同在一个包下：
 
-	package com.zhaoxuan.wehome.view.activity;
+```java
+package com.zhaoxuan.wehome.view.activity;
+```
 	
 同在一个包下的意义是什么呢？ForgetActivity$$ViewBinder 可以直接使用 ForgetActivity protected级别以上的属性方法。就像这样：
 
-		//accountEdit是ForgetActivity当中定义的控件
-	    target.accountEdit = finder.castView(view, 2131558541, "field 'accountEdit'");
+```java
+//accountEdit是ForgetActivity当中定义的控件
+target.accountEdit = finder.castView(view, 2131558541, "field 'accountEdit'");
+```
 
 所以你也应该知道了为什么当使用private时会报错了吧？
 
 2.我们不去管细节，只是大概看一下这段生成的代码是什么意思。我把解析写在注释里。
 
-	@Override
-    public void bind(final Finder finder, final T target, Object source) {
-        //定义了一个View对象引用，这个对象引用被重复使用了（这可是一个偷懒的写法哦~）
-        View view;
-        
-        //暂时不管Finder是个什么东西，反正就是一种类似于findViewById的操作。
-        view = finder.findRequiredView(source, 2131558541, "field 'accountEdit'");
-        
-        //target就是我们的ForgetActivity，为ForgetActivity中的accountEdit赋值
-        target.accountEdit = finder.castView(view, 2131558541, "field 'accountEdit'");
-        
-        view = finder.findRequiredView(source, 2131558543, "field 'forgetBtn' and method 'forgetOnClick'");
-        target.forgetBtn = finder.castView(view, 2131558543, "field 'forgetBtn'");
-        
-        //给view设置一个点击事件
-        view.setOnClickListener(
-                new butterknife.internal.DebouncingOnClickListener() {
-                    @Override
-                    public void doClick(android.view.View p0) {
-                    
-                    	//forgetOnClick()就是我们在ForgetActivity中写得事件方法。
-                       target.forgetOnClick();
-                       
-                    }
-                });
-    }
+```java
+@Override
+public void bind(final Finder finder, final T target, Object source) {
+    //定义了一个View对象引用，这个对象引用被重复使用了（这可是一个偷懒的写法哦~）
+    View view;
+    
+    //暂时不管Finder是个什么东西，反正就是一种类似于findViewById的操作。
+    view = finder.findRequiredView(source, 2131558541, "field 'accountEdit'");
+    
+    //target就是我们的ForgetActivity，为ForgetActivity中的accountEdit赋值
+    target.accountEdit = finder.castView(view, 2131558541, "field 'accountEdit'");
+    
+    view = finder.findRequiredView(source, 2131558543, "field 'forgetBtn' and method 'forgetOnClick'");
+    target.forgetBtn = finder.castView(view, 2131558543, "field 'forgetBtn'");
+    
+    //给view设置一个点击事件
+    view.setOnClickListener(
+            new butterknife.internal.DebouncingOnClickListener() {
+                @Override
+                public void doClick(android.view.View p0) {
+                
+                    //forgetOnClick()就是我们在ForgetActivity中写得事件方法。
+                   target.forgetOnClick();
+                   
+                }
+            });
+}
+```
 
 OK，现在你大致明白了ButterKnife的秘密了吧？通过自动生成代码的方式来代替我们去写findViewById这样繁琐的代码。现在你一定在疑惑两个问题：
 
@@ -253,7 +273,7 @@ OK，现在你大致明白了ButterKnife的秘密了吧？通过自动生成代�
 不着急不着急，慢慢看。
 #### 注解: @Bind的定义
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/6.jpeg)
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/afc9c0b2fc3448b79e756be1332337f9~tplv-k3u1fbpfcp-watermark.image)
 
 我们可以解读的信息如下：
 
@@ -270,13 +290,13 @@ OK，现在你大致明白了ButterKnife的秘密了吧？通过自动生成代�
 
 通过上面生成的代码，你一定奇怪，Finder到底是个什么东西。Finder实际是一个枚举。
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/8.jpeg)
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/834a05095a5f4b2ba9f53a5fc9b69664~tplv-k3u1fbpfcp-watermark.image)
 
 根据不同类型的，提供了不同实现的findView和getContext方法。这里你终于看到了熟悉的findViewById了吧，哈哈，秘密就在这里。
 
 另外Finder还有两个重要的方法，也是刚才没有介绍清楚的： *finder.findRequiredView* 和 *finder.castView*
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/9.jpeg)
+![](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/eb99d94003934d6980b058437fe0630e~tplv-k3u1fbpfcp-watermark.image)
 
 
 findRequiredView 方法调用了 findOptionalView 方法
@@ -295,7 +315,7 @@ castView上来啥都不干直接强转并return。如果发生异常，就执行
 
 bind有几个重载方法，但最终调的都是下面这个方法。
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/7.jpeg)
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ce2852f01e104bcf8ee337ebc8c8684d~tplv-k3u1fbpfcp-watermark.image)
 
 参数target一般是我们的Activity，source是用来获取Context查找资源的。当target是activity时，Finder是Finder.ACTIVITY。
 
@@ -310,12 +330,12 @@ bind有几个重载方法，但最终调的都是下面这个方法。
 
 你可能在疑惑，ButterKnife是如何识别注解的，又是如何生成代码的。
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/10.jpeg)
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/068dd7f89da348a2ac4a2b664e640d21~tplv-k3u1fbpfcp-watermark.image)
 
 AbstractProcessor是APT的核心类，所有的黑科技，都产生在这里。AbstractProcessor只有两个最重要的方法process 和 getSupportedAnnotationTypes。
 
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/11.jpeg)
+![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b5647fff00f74ee1b918f65589383e27~tplv-k3u1fbpfcp-watermark.image)
 
 重写getSupportedAnnotationTypes方法，用来表示该AbstractProcessor类处理哪些注解。
 
@@ -324,7 +344,7 @@ AbstractProcessor是APT的核心类，所有的黑科技，都产生在这里。
 而所有的注解处理，都是在process中执行的：
 
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/12.jpeg)
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/40af875fedab4f2696cbf94071dd0265~tplv-k3u1fbpfcp-watermark.image)
 
 通过findAndParseTargets方法拿到所有需要被处理的注解集合。然后对其进行遍历。
 
@@ -332,7 +352,9 @@ JavaFileObject是我们代码生成的关键对象，它的作用是写java文�
 
 这里我们只关注最重要的一句话
 
-	writer.write(bindingClass.brewJava());
+```java
+writer.write(bindingClass.brewJava());
+```
 	
 ForgetActivity$$ViewBinder中所有代码，都是通过bindingClass.brewJava方法拼出来的。
 
@@ -347,7 +369,7 @@ ForgetActivity$$ViewBinder中所有代码，都是通过bindingClass.brewJava方
 
 由此，你也知道了之前看生成的代码，为什么是用了偷懒的方法写了吧~
 
-![](http://7o4zmy.com1.z0.glb.clouddn.com/13.jpeg)
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f65bdf8b36b2404bbd6bd7c3568592fa~tplv-k3u1fbpfcp-watermark.image)
 
 
 ### 总结
